@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <title>Tic Tac Toe</title>
+</head>
+<body>
+    <div class="heading">
+        <h1>Manav's Tic Tac Toe</h1>
+    </div>
+    <div class="game">
+        <table>
+            <tr>
+                <td class="cell" id="0"></td>
+                <td class="cell" id="1"></td>
+                <td class="cell" id="2"></td>
+            </tr>
+            <tr>
+                <td class="cell" id="3"></td>
+                <td class="cell" id="4"></td>
+                <td class="cell" id="5"></td>            
+            </tr>
+            <tr>
+                <td class="cell" id="6"></td>
+                <td class="cell" id="7"></td>
+                <td class="cell" id="8"></td>            
+            </tr>
+        </table>
+        <div class="msg">
+            <div class="text"></div>
+        </div>
+        <div class="score-bar">
+            <div class="score-items">
+                <div class="score-item">
+                    <div class="text">
+                        Win
+                    </div>
+                    <div class="hu">
+                        0
+                    </div>
+                </div>
+                <div class="score-item">
+                    <div class="text">
+                        Tie
+                    </div>
+                    <div class="tie">
+                        0
+                    </div>
+                </div>
+                <div class="score-item">
+                    <div class="text">
+                        Loss
+                    </div>
+                    <div class="ai">
+                        0
+                    </div>
+                </div>
+            </div>
+            <button class="retry" onclick="retry()">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+        <div class="ai">
+            <button id="aibtn" onclick="toggleAi()">Unbeatable AI OFF</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
