@@ -16,6 +16,7 @@ const winCombos = [
 
 let huWins = 0;
 let aiWins = 0;
+let ties = 0;
 let minimaxFlag = false;
 const cells = document.querySelectorAll('.cell');
 
@@ -23,6 +24,8 @@ start();
 
 // clears the board, and adds event listeners to each cell
 function start() {
+    const table = document.querySelector("table");
+    table.removeEventListener('click', start, false);
     document.querySelector(".msg").style.display = "none";
     board = Array.from(Array(9).keys());
     for (let i = 0; i < cells.length; i++) {
@@ -32,12 +35,22 @@ function start() {
     }
 }
 
+function retry() {
+    resetScore();
+    start();
+}
+
 // resolves clicks to the board
+let isAITurn = false;
 function turnClick(event) {
-    if (typeof board[event.target.id] === 'number') {
+    if (isAITurn == false && typeof board[event.target.id] === 'number') {
         turn(event.target.id, huPlayer);
         if (!checkWin(board, huPlayer) && !checkTie()) {
-            turn(bestSpot(), aiPlayer);
+            isAITurn = true;
+            setTimeout(() => {
+                turn(bestSpot(), aiPlayer);
+                isAITurn = false;
+            }, 500);
         }
     }
 }
@@ -45,7 +58,14 @@ function turnClick(event) {
 // updates the board with the player's move
 function turn(cellId, player) {
     board[cellId] = player;
-    document.getElementById(cellId).innerText = player;
+    const cell = document.getElementById(cellId);
+    cell.innerText = player;
+    cell.classList.add('fade-in');
+
+    cell.addEventListener('animationend', () => {
+        cell.classList.remove('fade-in');
+    }, { once: true });
+
     let gameWon = checkWin(board, player);
     if (gameWon) gameOver(gameWon);
 }
@@ -84,14 +104,14 @@ function gameOver(gameWon) {
     for (let i = 0; i < cells.length; i++) {
         cells[i].removeEventListener('click', turnClick, false);
     }
-    declareWinner(gameWon.player === huPlayer ? "You win" : "You lose");
+    declareWinner(gameWon.player === huPlayer ? "You win!" : "You lose!");
 }
 
 // checks if the game is a tie, game tied if no cell in board is empty
 function checkTie() {
     if (emptySquares(board).length === 0) {
         for (let i = 0; i < cells.length; i++) {
-            cells[i].style.backgroundColor = "aqua";
+            // cells[i].style.backgroundColor = "neon";
             cells[i].removeEventListener('click', turnClick, false);
         }
         declareWinner("Tie Game!");
@@ -100,41 +120,52 @@ function checkTie() {
     return false;
 }
 
-// displays the winner of the game 
+// displays the winner of the game and updates the score
 function declareWinner(msg) {
     document.querySelector(".msg").style.display = "block";
     document.querySelector(".msg .text").innerText = msg;
     
-    if (msg === "You win") {
+    if (msg === "You win!") {
         huWins++;
-    } else if (msg === "You lose") {
+    } else if (msg === "You lose!") {
         aiWins++;
+    } else if (msg === "Tie Game!") {
+        ties++;
     }
-
     updateScore();
+    const table = document.querySelector("table");
+    setTimeout(() => {
+        table.addEventListener('click', start, false);
+    }, 1000);
 }
 
 // updates the score board
 function updateScore() {
-    document.querySelector(".score .hu").innerText = huWins;
-    document.querySelector(".score .ai").innerText = aiWins;
+    document.querySelector(".score-bar .hu").innerText = huWins;
+    document.querySelector(".score-bar .ai").innerText = aiWins;
+    document.querySelector(".score-bar .tie").innerText = ties;
 }
 
 // resets the score board
 function resetScore() {
     huWins = 0;
     aiWins = 0;
+    ties = 0;
     updateScore();
 }
 
 // toggles the AI between unbeatable and random
 function toggleAi() {
     const aiBtn = document.querySelector("#aibtn");
-    if (aiBtn.innerText.includes("Enable")) {
-        aiBtn.innerText = "Disable unbeatable AI";
+    if (aiBtn.innerText.includes("OFF")) {
+        aiBtn.innerText = "Unbeatable AI ON";
+        aiBtn.style.backgroundColor = "red";
+        aiBtn.style.color = "white";
         minimaxFlag = true;
     } else {
-        aiBtn.innerText = "Enable unbeatable AI";
+        aiBtn.innerText = "Unbeatable AI OFF";
+        aiBtn.style.backgroundColor = "greenyellow";
+        aiBtn.style.color = "black";
         minimaxFlag = false;
     }
 }
@@ -157,6 +188,7 @@ function emptySquares(newBoard) {
 
 // minimax algorithm with alpha beta pruning
 function minimax(newBoard, player, alpha = -Infinity, beta = Infinity) {
+    // get the available spots in form of an array
     let availableSpots = emptySquares(newBoard);
     
     // base conditions
@@ -194,6 +226,7 @@ function minimax(newBoard, player, alpha = -Infinity, beta = Infinity) {
         }
     }
 
+    // calculates best move on the basis of highest score for ai player, and lowest score for computer player
     let bestMove;
     if (player === aiPlayer) {
         let bestScore = -Infinity;
