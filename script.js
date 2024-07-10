@@ -1,6 +1,8 @@
 let board;
 const huPlayer = 'O';
 const aiPlayer = 'X';
+
+// all the possible positions in the tictactoe board for winning the game
 const winCombos = [
     [0, 1, 2],
     [3, 4, 5],
@@ -14,15 +16,13 @@ const winCombos = [
 
 let huWins = 0;
 let aiWins = 0;
-let ties = 0;
 let minimaxFlag = false;
 const cells = document.querySelectorAll('.cell');
 
 start();
 
+// clears the board, and adds event listeners to each cell
 function start() {
-    const table = document.querySelector("table");
-    table.removeEventListener('click', start, false);
     document.querySelector(".msg").style.display = "none";
     board = Array.from(Array(9).keys());
     for (let i = 0; i < cells.length; i++) {
@@ -32,39 +32,25 @@ function start() {
     }
 }
 
-function retry() {
-    resetScore();
-    start();
-}
-
-let isAITurn = false;
+// resolves clicks to the board
 function turnClick(event) {
-    if (isAITurn == false && typeof board[event.target.id] === 'number') {
+    if (typeof board[event.target.id] === 'number') {
         turn(event.target.id, huPlayer);
         if (!checkWin(board, huPlayer) && !checkTie()) {
-            isAITurn = true;
-            setTimeout(() => {
-                turn(bestSpot(), aiPlayer);
-                isAITurn = false;
-            }, 500);
+            turn(bestSpot(), aiPlayer);
         }
     }
 }
 
+// updates the board with the player's move
 function turn(cellId, player) {
     board[cellId] = player;
-    const cell = document.getElementById(cellId);
-    cell.innerText = player;
-    cell.classList.add('fade-in');
-
-    cell.addEventListener('animationend', () => {
-        cell.classList.remove('fade-in');
-    }, { once: true });
-
+    document.getElementById(cellId).innerText = player;
     let gameWon = checkWin(board, player);
     if (gameWon) gameOver(gameWon);
 }
 
+// checks if the player has won the game
 function checkWin(board, player) {
     let plays = [];
     for (let i = 0; i < 9; i++) {
@@ -90,6 +76,7 @@ function checkWin(board, player) {
     return gameWon;
 }
 
+// ends the game and highlights the winning combination
 function gameOver(gameWon) {
     for (let index of winCombos[gameWon.index]) {
         document.getElementById(index).style.backgroundColor = gameWon.player === huPlayer ? "green" : "red";
@@ -97,13 +84,14 @@ function gameOver(gameWon) {
     for (let i = 0; i < cells.length; i++) {
         cells[i].removeEventListener('click', turnClick, false);
     }
-    declareWinner(gameWon.player === huPlayer ? "You win!" : "You lose!");
+    declareWinner(gameWon.player === huPlayer ? "You win" : "You lose");
 }
 
+// checks if the game is a tie, game tied if no cell in board is empty
 function checkTie() {
     if (emptySquares(board).length === 0) {
         for (let i = 0; i < cells.length; i++) {
-            // cells[i].style.backgroundColor = "neon";
+            cells[i].style.backgroundColor = "aqua";
             cells[i].removeEventListener('click', turnClick, false);
         }
         declareWinner("Tie Game!");
@@ -112,53 +100,46 @@ function checkTie() {
     return false;
 }
 
+// displays the winner of the game 
 function declareWinner(msg) {
     document.querySelector(".msg").style.display = "block";
     document.querySelector(".msg .text").innerText = msg;
     
-    if (msg === "You win!") {
+    if (msg === "You win") {
         huWins++;
-    } else if (msg === "You lose!") {
+    } else if (msg === "You lose") {
         aiWins++;
-    } else if (msg === "Tie Game!") {
-        ties++;
     }
+
     updateScore();
-    const table = document.querySelector("table");
-    setTimeout(() => {
-        table.addEventListener('click', start, false);
-    }, 1000);
 }
 
+// updates the score board
 function updateScore() {
-    document.querySelector(".score-bar .hu").innerText = huWins;
-    document.querySelector(".score-bar .ai").innerText = aiWins;
-    document.querySelector(".score-bar .tie").innerText = ties;
+    document.querySelector(".score .hu").innerText = huWins;
+    document.querySelector(".score .ai").innerText = aiWins;
 }
 
+// resets the score board
 function resetScore() {
     huWins = 0;
     aiWins = 0;
-    ties = 0;
     updateScore();
 }
 
+// toggles the AI between unbeatable and random
 function toggleAi() {
     const aiBtn = document.querySelector("#aibtn");
-    if (aiBtn.innerText.includes("OFF")) {
-        aiBtn.innerText = "Unbeatable AI ON";
-        aiBtn.style.backgroundColor = "red";
-        aiBtn.style.color = "white";
+    if (aiBtn.innerText.includes("Enable")) {
+        aiBtn.innerText = "Disable unbeatable AI";
         minimaxFlag = true;
     } else {
-        aiBtn.innerText = "Unbeatable AI OFF";
-        aiBtn.style.backgroundColor = "greenyellow";
-        aiBtn.style.color = "black";
+        aiBtn.innerText = "Enable unbeatable AI";
         minimaxFlag = false;
     }
 }
 
-
+// returns the best spot for the computer to move
 function bestSpot() {
     if (minimaxFlag) {
         return minimax(board, aiPlayer).index;
@@ -169,14 +150,16 @@ function bestSpot() {
     }
 }
 
+// returns the empty squares in the board
 function emptySquares(newBoard) {
     return newBoard.filter(s => typeof s === 'number');
 }
 
+// minimax algorithm with alpha beta pruning
 function minimax(newBoard, player, alpha = -Infinity, beta = Infinity) {
     let availableSpots = emptySquares(newBoard);
     
-    // base condition
+    // base conditions
     if (checkWin(newBoard, huPlayer)) {
         return {score: -1};
     } else if (checkWin(newBoard, aiPlayer)) {
