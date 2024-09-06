@@ -83,6 +83,7 @@
    
        return moves[bestMove];
    }
+
    ```
    ## GUI
-   ![image](https://github.com/manav-chan/AspireNex/assets/71835184/65032505-d278-4794-9ee9-fc06267c5bdd)
+![Screenshot from 2024-07-10 19-43-38](https://github.com/user-attachments/assets/78145814-5535-4431-a862-3d945f70b019)
